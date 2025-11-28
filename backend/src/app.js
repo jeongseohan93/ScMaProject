@@ -20,7 +20,7 @@ app.use(morgan("dev"));
 app.use("/upload", express.static("upload"));
 
 // 라우터 등록
-// 테스트용 /auth/me (나중에 JWT 검증 넣으면 됨)
+// 테스트용 /auth/me (나중에 JWT 검증 넣으면 됨) 
 app.get("/auth/me", (req, res) => {
   // TODO: 나중에 쿠키 꺼내서 JWT 검증할 자리
   // 지금은 무조건 로그인 된 걸로 가정

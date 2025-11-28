@@ -1,6 +1,6 @@
 {
   "name": "my-monorepo",
-  "private": true,                
+  "private": true,
   "workspaces": [
     "backend",
     "frontend"
@@ -8,7 +8,14 @@
   "scripts": {
     "dev:backend": "npm start --workspace backend",
     "dev:frontend": "npm run dev --workspace frontend",
-    "dev": "npm run dev:backend & npm run dev:frontend",
-    "start" :  "npm run dev"
+
+    "dev:open": "sleep 3 && open http://localhost:3000",
+
+    "dev": "concurrently -n BE,FE,OPEN \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:open\"",
+
+    "start": "npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

@@ -1,21 +1,25 @@
-// app/page.tsx (Server Component)
+// src/app/page.tsx
 import { authMe } from "../features/auth/api/auth";
 import { redirect } from "next/navigation";
+import { LogoutButton } from "../app/Logout"; // 경로는 네 구조에 맞게 조정
 
 export default async function Home() {
   const user = await authMe();
 
-  // 1) 유저 없으면 → /login 으로 보내기
+  // 1) 유저 없으면 → /auth 로 보내기
   if (!user) {
-    redirect("/login");
+    redirect("/auth");
   }
 
-  // 2) 유저 있으면 → 여기서 바로 메인 레이아웃 구성
+  // 2) 유저 있으면 → 메인 레이아웃 + 로그아웃 버튼
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b px-4 py-2 flex justify-between items-center">
         <div className="font-bold">SCMA</div>
-        <div>{user.nickname} 님</div>
+        <div className="flex items-center gap-3">
+          <span>{user.nickname} 님</span>
+          <LogoutButton />
+        </div>
       </header>
 
       <main className="flex-1 flex">

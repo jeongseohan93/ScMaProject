@@ -13,20 +13,5 @@ router.post('/login', login);
 
 router.post('/logout', logout)
 
-// 현재 로그인한 유저 조회
-router.get("/me", requireAuth, (req, res) => {
-  const user = req.user;
-
-  res.json({
-    success: true,
-    user: {
-      id: user.id,
-      email: user.email,
-      nickname: user.nickname,
-      role: user.role,
-    },
-  });
-});
-
 module.exports = router;
    

@@ -1,6 +1,5 @@
 import { authMe } from "@/src/features/auth/api/auth";
 import { redirect } from "next/navigation";
-import LoginPage from "../../features/auth/pages/LoginPage";
 
 export default async function Login() {
   const user = await authMe();
@@ -10,5 +9,8 @@ export default async function Login() {
     redirect("/");
   }
 
-  return <LoginPage />; 
+  if (!user) {
+    redirect("/auth/login")
+  }
+    
 }

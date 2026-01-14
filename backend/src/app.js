@@ -3,6 +3,10 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const authRoutes = require('./routes/auth.routes');
+const scheduleRouter = require('./routes/scheduleRouter');
+const chatRouter = require('./routes/chat.router');
+const scheduleListRouter = require('./routes/scheduleListRouter');
+const userRouter = require('./routes/user.router');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -23,6 +27,10 @@ app.use("/upload", express.static("upload"));
 
 // 라우터 등록
 app.use('/auth', authRoutes);
+app.use('/schedule', scheduleRouter);
+app.use('/user', userRouter);
+app.use('/chat', chatRouter);
+app.use('/schedule-list', scheduleListRouter);
 
 // 에러 처리 미들웨어
 

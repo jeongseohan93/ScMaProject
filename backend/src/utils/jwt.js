@@ -1,46 +1,78 @@
-// backend/utils/jwt.js
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
-const ACCESS_EXPIRES_IN = "15m";
-const REFRESH_EXPIRES_IN = "30d";
+const ACCESS_SECRET = process.env.ACCESS_JWT_SECRET;
+const REFRESH_SECRET = process.env.REFRESH_JWT_SECRET;
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+// 운영 권장(있으면 넣고, 없으면 제거 가능)
+const ISSUER = process.env.JWT_ISSUER || undefined;
+const AUDIENCE = process.env.JWT_AUDIENCE || undefined;
 
-if (!ACCESS_SECRET || !REFRESH_SECRET) {
-  console.warn(
-    "[WARN] JWT_ACCESS_SECRET / JWT_REFRESH_SECRET 환경변수가 설정되지 않았습니다."
+/**
+ * Refresh 세션 식별자(jti) 생성
+ */
+function newJti() {
+  // Node 22 OK
+  return crypto.randomUUID();
+}
+
+/**
+ * Refresh 원문 저장 금지: 해시로 저장/비교
+ */
+function hashToken(token) {
+  const pepper = process.env.REFRESH_TOKEN_PEPPER || "";
+  return crypto.createHash("sha256").update(token + pepper).digest("hex");
+}
+
+function signAccessToken({ userId, role, tokenVersion }) {
+  if (!ACCESS_SECRET) throw new Error("MISSING_ACCESS_SECRET");
+
+  return jwt.sign(
+    { sub: userId, role, token_version: tokenVersion },
+    ACCESS_SECRET,
+    { expiresIn: "5m", issuer: ISSUER, audience: AUDIENCE }
   );
 }
 
-exports.signAccessToken = (payload) => {
-  return jwt.sign(payload, ACCESS_SECRET, {
-    expiresIn: ACCESS_EXPIRES_IN,
-  });
-};
+function signRefreshToken({ userId, tokenVersion, jti }) {
+  if (!REFRESH_SECRET) throw new Error("MISSING_REFRESH_SECRET");
+  if (!jti) throw new Error("MISSING_JTI");
 
-exports.signRefreshToken = (payload) => {
-  return jwt.sign(payload, REFRESH_SECRET, {
-    expiresIn: REFRESH_EXPIRES_IN,
-  });
-};
+  return jwt.sign(
+    { sub: userId, token_version: tokenVersion, jti },
+    REFRESH_SECRET,
+    { expiresIn: "30d", issuer: ISSUER, audience: AUDIENCE }
+  );
+}
 
-// Access Token 검증
-exports.verifyAccessToken = (token) => {
-  try {
-    return jwt.verify(token, ACCESS_SECRET);
-  } catch (err) {
-    // 여기서 바로 AuthError로 바꿀지, 그냥 throw 할지는 선택사항
-    // 일단은 원본 에러 던지고, 미들웨어에서 AuthError로 감싸는 패턴이 더 깔끔함
-    throw err;
-  }
-};
+function verifyAccessToken(token) {
+  if (!ACCESS_SECRET) throw new Error("MISSING_ACCESS_SECRET");
+  return jwt.verify(token, ACCESS_SECRET, { issuer: ISSUER, audience: AUDIENCE });
+}
 
-// Refresh Token 검증 (나중에 /auth/refresh 같은 곳에서 사용)
-exports.verifyRefreshToken = (token) => {
-  try {
-    return jwt.verify(token, REFRESH_SECRET);
-  } catch (err) {
-    throw err;
-  }
+function verifyRefreshToken(token) {
+  if (!REFRESH_SECRET) throw new Error("MISSING_REFRESH_SECRET");
+  return jwt.verify(token, REFRESH_SECRET, { issuer: ISSUER, audience: AUDIENCE });
+}
+
+/**
+ * (기존 이름 호환)
+ * 프로젝트 다른 파일들이 verifyAccess/verifyRefresh를 쓰면 깨질 수 있으니 alias도 같이 둠
+ */
+const verifyAccess = verifyAccessToken;
+const verifyRefresh = verifyRefreshToken;
+
+module.exports = {
+  newJti,
+  hashToken,
+
+  signAccessToken,
+  signRefreshToken,
+
+  verifyAccessToken,
+  verifyRefreshToken,
+
+  // alias (기존 코드 호환)
+  verifyAccess,
+  verifyRefresh,
 };

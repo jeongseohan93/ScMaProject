@@ -1,5 +1,3 @@
-// /backend/models/UserLoginLog.js
-
 /**
  * UserLoginLog 모델
  * - 유저의 모든 로그인(성공/실패) 시도를 기록하는 테이블

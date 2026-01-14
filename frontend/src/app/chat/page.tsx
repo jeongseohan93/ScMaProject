@@ -1,7 +1,5 @@
-export default async function Chat() {
-    return(
-        <>
-            채팅
-        </>
-    );
+import ChatListUI from "./ChatListUI";
+
+export default function Page() {
+  return <ChatListUI list={[]} />;
 }

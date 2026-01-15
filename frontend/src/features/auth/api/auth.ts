@@ -14,7 +14,7 @@ export async function authMe(): Promise<UserDTO | null> {
   try {
     const cookieHeader = (await cookies()).toString();
 
-    const base = process.env.NEXT_PUBLIC_API_BASE; // 너가 쓰는 키 유지
+    const base = "http://localhost:3005"; // 너가 쓰는 키 유지
     if (!base) return null;
 
     const res = await fetch(`${base}/auth/me`, {

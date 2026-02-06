@@ -15,9 +15,10 @@ const PORT = process.env.PORT || 3005;
 const server = http.createServer(app);
 
 // 2) socket.io 를 server에 붙인다
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // Next 프론트 주소
+    origin: "http://localhost:3000", 
     methods: ["GET", "POST"],
     credentials: true,
   },

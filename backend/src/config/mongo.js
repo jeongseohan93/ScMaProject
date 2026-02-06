@@ -1,4 +1,3 @@
-// config/mongo.js
 const mongoose = require('mongoose');
 
 /**
@@ -13,12 +12,12 @@ const mongoose = require('mongoose');
  * 서버 실행 시 단 한 번 호출되어 연결 상태를 확인한다.
  */
 async function connectMongo() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("MongoDB 연결 성공");
-  } catch (err) {
-    console.error("MongoDB 연결 실패:", err);
-  }
+    try {
+        await mongoose.connect(process.env.MONGO_URI);
+        console.log("MongoDB 연결 성공");
+    } catch (err) {
+        console.error("MongoDB 연결 실패:", err);
+    }
 }
 
 module.exports = connectMongo;

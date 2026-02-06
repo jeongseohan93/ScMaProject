@@ -1,3 +1,4 @@
+
 module.exports = (sequelize, DataTypes) => {
     if (!DataTypes) {
         throw new Error("DataTypes is undefined. Check your models/index.js!");

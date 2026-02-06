@@ -1,8 +1,8 @@
-const AuthError = require('../services/errors/AuthError');
+const AuthError = require('../service/error/AuthError');
 
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, next){
     
-    if( err instanceof AuthError) {
+    if( err instanceof AuthError ) {
         return res.status(err.statusCode || 401).json({
             success: false,
             message: err.message,

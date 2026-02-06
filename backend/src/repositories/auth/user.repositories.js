@@ -1,44 +1,52 @@
 const { User } = require("../../models/sql");
 
-async function findUserByEmail(email) {
-  return User.findOne({
-    where: { email },
-  });
+/**
+ * ー 이메일 사용자 조회
+ * 
+ * @description
+ *  - User 테이블에서 email　기준으로 단일 사용자 조회
+ *  - 조회하지 않으면 null 반환
+ *
+ * @param {string} email 
+ * @returns {Promise<User|null>} 조회된 사용자 엔티티 또는 null
+ */
+async function findUserByEmail (email) {
+    return User.findOne({
+        where: { email },
+    });
 }
 
-/**
- * 로그인 실패 횟수 증가
- * - 반드시 instance update 사용
- */
 async function increaseLoginFail(user, { now }, options = {}) {
   return user.update(
     {
-      loginFailCount: (user.loginFailCount || 0) + 1,
-      lastFailedLoginAt: now,
+      loginFailCount: (user.loginFailCount ?? 0) + 1,
+      lastLoginFailAt: now,
     },
-    options
+    {
+      transaction: options.transaction,
+    }
   );
 }
 
-/**
- * 로그인 성공 처리
- * - 여기서 User.update 쓰면 무조건 에러 남
- * - 반드시 user.update 써야 함
- */
-async function markLoginSuccess(user, { now, loginIp }, options = {}) {
-  return user.update(
-    {
-      loginFailCount: 0,
-      lastFailedLoginAt: null,
-      lastLoginAt: now,
-      lastLoginIp: loginIp,
-    },
-    options
-  );
+async function markLoginSuccess(user, {now, loginIp}, options = {}) {
+    return user.update(
+        {
+            loginFailCount: 0,
+            lastFailedLoginAt: null,
+            lastLoginAt: now,
+            lastLoginIp: loginIp,
+        },
+        options
+    );
 }
+
+async function findUserById(id){
+  return User.findByPk(id);
+} 
 
 module.exports = {
-  findUserByEmail,
-  increaseLoginFail,
-  markLoginSuccess,
-};
+    findUserByEmail,
+    increaseLoginFail,
+    findUserById,
+    markLoginSuccess,
+}

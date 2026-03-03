@@ -1,12 +1,18 @@
-import { redirect } from "next/navigation";
-import LoginLayout from "./_components/LoginLayout";
-import { authmeServer } from "@/src/lib/api/authApi.server";
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import LoginPanel from './_components/LoginPanel';
 
 export default async function LoginPage() {
     
-    const data = await authmeServer().catch(() => null);
-
-    if(data?.user?.id) redirect('/feed');
+    const cookieStore = await cookies();
+    const token = cookieStore.get('accesToken');
+    if( token ){
+        redirect('/feed');
+    }
     
-  return <LoginLayout />;
+    return (
+        <main className="flex min-h-screen items-center justify-center bg-background">
+            <LoginPanel />
+        </main>
+    )
 }

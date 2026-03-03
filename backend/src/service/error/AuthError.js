@@ -1,3 +1,4 @@
+
 class AuthError extends Error {
     /**
      * AuthError 생성자

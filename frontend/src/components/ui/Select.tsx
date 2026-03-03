@@ -1,3 +1,4 @@
+
 type Option = {
   label: string;
   value: string;
@@ -5,7 +6,7 @@ type Option = {
 
 type Props = {
   name: string;
-  value: string;
+  value: string | undefined;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: Option[];
   placeholder?: string;

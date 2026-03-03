@@ -1,3 +1,4 @@
+
 function getDeviceInfo(userAgentRaw = ""){
     const ua = (userAgentRaw || "").toLocaleLowerCase();
 

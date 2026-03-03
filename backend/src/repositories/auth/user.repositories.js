@@ -1,34 +1,43 @@
-const { User } = require("../../models/sql");
+const { User, sequelize } = require('../../models/sql');
 
-/**
- * ー 이메일 사용자 조회
- * 
- * @description
- *  - User 테이블에서 email　기준으로 단일 사용자 조회
- *  - 조회하지 않으면 null 반환
- *
- * @param {string} email 
- * @returns {Promise<User|null>} 조회된 사용자 엔티티 또는 null
- */
-async function findUserByEmail (email) {
-    return User.findOne({
-        where: { email },
-    });
+exports.findByEmail = async (email) => {
+    return await User.findOne({
+        where: {email},
+    })
 }
+exports.createUser = async (userData) => {
+    console.log('[BE] 레포지토리에 전달된 데이터:', userData)
+    return await User.create({
+    email: userData.email,
+    password: userData.password,
+    name: userData.name,
+    nickname: userData.nickname || null,
+    phoneNumber: userData.phoneNumber || null,
+    birth: userData.birth || null,
+    gender: userData.gender === '' ? null : userData.gender, 
+    signupIp: userData.signIp || userData.signupIp, 
+    role: userData.role || 'USER',
+    status: userData.status || 'ACTIVE',
+    preferredLanguage: userData.preferredLanguage || 'ko',
+    timeZone: userData.timeZone || 'Asia/Seoul',
+    lastLoginAt: userData.lastLoginAt || new Date(),
+  });
+} 
 
-async function increaseLoginFail(user, { now }, options = {}) {
-  return user.update(
-    {
-      loginFailCount: (user.loginFailCount ?? 0) + 1,
-      lastLoginFailAt: now,
-    },
-    {
-      transaction: options.transaction,
-    }
-  );
-}
+exports.increaseLoginFail = async (userId, {transaction} = {}) => {
+    return await User.update(
+        { 
+            loginFailCount: sequelize.literal('login_fail_count + 1'),
+            lastFailedLoginAt: new Date(), 
+        },
+        { 
+            where: { id: userId },
+            transaction,
+        }
+    );
+};
 
-async function markLoginSuccess(user, {now, loginIp}, options = {}) {
+exports.markLoginSuccess = (user, {now, loginIp}, options = {}) => {
     return user.update(
         {
             loginFailCount: 0,
@@ -37,16 +46,9 @@ async function markLoginSuccess(user, {now, loginIp}, options = {}) {
             lastLoginIp: loginIp,
         },
         options
-    );
+    )
 }
 
-async function findUserById(id){
-  return User.findByPk(id);
-} 
-
-module.exports = {
-    findUserByEmail,
-    increaseLoginFail,
-    findUserById,
-    markLoginSuccess,
+exports.findUserById = (id) => {
+    return User.findByPk(id);
 }

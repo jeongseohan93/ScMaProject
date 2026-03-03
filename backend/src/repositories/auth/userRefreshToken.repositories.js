@@ -74,3 +74,9 @@ exports.rotateRefreshSession = async ({
     );
   });
 };
+
+exports.deleteRefreshSession = async (refreshToken) => {
+  return await UserRefreshToken.destroy({
+    where: {tokenHash: refreshToken}
+  });
+}

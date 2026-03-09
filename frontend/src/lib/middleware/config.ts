@@ -1,0 +1,1 @@
+export const AUTH_FORBIDDEN_PATHS = ['/login', '/register'];

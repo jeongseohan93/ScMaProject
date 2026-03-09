@@ -1,27 +1,25 @@
-"use client";
+"use client"
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-// 1. 인터페이스 정의 (any 탈출)
 interface MenuItem {
-  name: string;
-  icon: React.ReactNode;
-  href: string; // 이동할 경로 추가
+    name: string;
+    icon: React.ReactNode;
+    href: string;
 }
 
 interface SidebarItemProps {
-  item: MenuItem;
-  isCollapsed: boolean;
+    item: MenuItem;
+    isCollapsed: boolean;
 }
 
 export default function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
-  const pathname = usePathname();
-  
-  // 현재 경로와 메뉴의 href가 일치하는지 확인 (Active 상태)
-  const isActive = pathname === item.href;
+    const pathname = usePathname();
 
-  return (
+    const isActive = pathname === item.href;
+
+    return (
     <Link href={item.href}>
       <li className={`
         flex items-center h-12 rounded-lg cursor-pointer transition-colors group relative

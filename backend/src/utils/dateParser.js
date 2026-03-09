@@ -1,3 +1,4 @@
+
 // 'date-fns' 라이브러리에서 'format' 함수를 가져옴.
 // 추출된 JavaScript Date 객체를 'YYYY-MM-DD HH:MM:SS' 형식의 문자열로 변환하는 데 사용됨.
 const { format } = require('date-fns');

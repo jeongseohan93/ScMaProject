@@ -1,70 +1,88 @@
-// backend/controllers/auth.controller.js
-const bcrypt = require('bcrypt');  // ← 네가 원하는 bcrypt 유지!
-const { User } = require('../models/sql');
+const authService = require('../service/auth/auth.service');
+const getClientIp = require('../utils/getClientIp');
+const getDeviceInfo = require('../utils/getDeviceInfo');
 
-exports.register = async (req, res) => {
-  try {
-    const {
-      email,
-      password,
-      name,
-      nickname,
-      phoneNumber,
-      birth,
-      gender,
-      preferredLanguage,
-      timeZone,
-    } = req.body;
+exports.register = async (req, res, next) => {
+    try{
+        const user = await authService.registerUser({
+            ...req.body,
+            signIp: getClientIp(req),
+        })
 
-    const signupIp =
-      req.headers['x-forwarded-for']?.split(',')[0] ||
-      req.connection?.remoteAddress ||
-      req.socket?.remoteAddress ||
-      req.ip;
-
-    // 1) 필수값 체크
-    if (!email || !password || !name) {
-      return res.status(400).json({ message: '필수 값(email, password, name)이 누락되었습니다.' });
+        return res.status(201).json({
+            success: true,
+            message: '회원가입이 완료되었습니다.',
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                nickname: user.nickname,
+            },
+        });
+    } catch (err) {
+        next(err);
     }
+}
 
-    // 2) 중복 이메일 체크
-    const exists = await User.findOne({ where: { email } });
-    if (exists) {
-      return res.status(409).json({ message: '이미 사용 중인 이메일입니다.' });
+exports.login = async (req, res, next) => {
+    try {
+        const email = req.body?.email;
+        const password = req.body?.password;
+
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: "email/password required" });
+        }
+
+        const loginIp = getClientIp(req);
+        const userAgent = req.headers["user-agent"] || "";
+        const { loginType, deviceType } = getDeviceInfo(userAgent);
+
+        const { accessToken, refreshToken, user } = await authService.loginService({
+            email,
+            password,
+            loginIp,
+            userAgent,
+            loginType,
+            deviceType,
+        });
+
+        return res.status(200).json({
+            success: true,
+            accessToken,
+            refreshToken,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name
+            }
+        });
+
+    } catch (err) {
+        console.error("로그인 컨트롤러 에러:", err.message);
+
+        if(err.name === "AuthError" || err.status === 401){
+            return res.status(401).json({success: false, message: err.message});
+        }
+
+        return res.status(500).json({success: false, message: "서버 내부 오류"});
     }
+}
 
-    // 3) 비밀번호 해시
-    const hashedPassword = await bcrypt.hash(password, 10);
+exports.logout = async (req, res, next) => {
+    try {
+        //쿠키에서 리프레시 토큰을 꺼내기
+        const refreshToken = req.cookies.refresh_token || req.body.refreshToken;
 
-    // 4) DB Insert
-    const user = await User.create({
-      email,
-      password: hashedPassword,
-      name,
-      nickname: nickname || null,
-      phoneNumber: phoneNumber || null,
-      birth: birth || null,
-      gender: gender || null,
-      preferredLanguage: preferredLanguage || 'ko',
-      timeZone: timeZone || 'Asia/Seoul',
-      signupIp,               // ← ★ 여기가 핵심!! (camelCase로 넣어야 DB 컬럼 signup_ip로 들어감)
-    });
-
-    // 5) 응답
-    return res.status(201).json({
-      message: '회원가입이 완료되었습니다.',
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        nickname: user.nickname,
-      },
-    });
-  } catch (err) {
-    console.error('register error:', err);
-    return res.status(500).json({
-      message: '서버 오류가 발생했습니다.',
-    });
-  }
-};
-
+        if(refreshToken) {
+            await authService.logout(refreshToken);
+        }
+        
+        // 성공하든 말든 로그아웃 성공 처리(이미 없는 토큰 가능성)
+        return res.status(200).json({success: true, message: "Logged out"});
+    } catch (err) {
+        console.error("로그아웃 에러:", err);
+        
+        // 로그아웃 에러는 사용자에게 알릴 필요 없이 그냥 넘어가도 상관 x
+        return res.status(200).json({success: true});
+    }
+}

@@ -9,10 +9,12 @@ export const api = {
      * @param body - 보낼 데이터 객체
      * @returns 
      */
-    post: async <TResponse, TBody = unknown> ( url: string, body: TBody ): Promise<TResponse> => {
+    post: async <TResponse, TBody = unknown> ( url: string, body: TBody, headers?: Record<string, string> ): Promise<TResponse> => {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}${url}`, {
             method: 'POST',
-            headers: { 'Content-Type' : 'application/json' },
+            headers: { 'Content-Type' : 'application/json',
+                        ...headers
+             },
             body: JSON.stringify(body),
         });
         if(!res.ok) {

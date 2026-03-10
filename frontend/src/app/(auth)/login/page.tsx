@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import LoginPanel from './_components/LoginPanel';
 
 export default async function LoginPage() {
 
@@ -11,6 +12,7 @@ export default async function LoginPage() {
 
     return (
         <main className="flex min-h-screen items-center justify-center bg-background">
+            <LoginPanel />
         </main>
     )
 }
